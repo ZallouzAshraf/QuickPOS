@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, ShoppingCart, Mail, Lock } from "lucide-react";
-import Footer from "../common/footer";
+import Footer from "../../common/footer";
 import Link from "next/link";
 
 export default function LoginForm() {
@@ -143,7 +143,7 @@ export default function LoginForm() {
             <div className="text-center text-sm text-slate-600 font-medium">
               Pas encore de compte ?{" "}
               <Link
-                href="/register"
+                href="auth/register"
                 className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors"
               >
                 Créer un compte
