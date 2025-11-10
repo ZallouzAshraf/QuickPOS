@@ -14,7 +14,7 @@ import {
   User,
   Building2,
 } from "lucide-react";
-import Footer from "../common/footer";
+import Footer from "../../common/footer";
 import Link from "next/link";
 
 export default function RegisterForm() {
@@ -259,7 +259,7 @@ export default function RegisterForm() {
             <div className="text-center text-sm text-slate-600 font-medium">
               Vous avez déjà un compte ?{" "}
               <Link
-                href="/login"
+                href="auth/login"
                 className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors"
               >
                 Se connecter

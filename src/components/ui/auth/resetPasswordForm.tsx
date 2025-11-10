@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShoppingCart, Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { isValidEmail } from "@/src/utils/validation";
-import Footer from "../common/footer";
+import { isValidEmail } from "@/src/core/utils/validation";
+import Footer from "../../common/footer";
 import Link from "next/link";
 
 export default function ResetPasswordForm() {
@@ -163,7 +163,7 @@ export default function ResetPasswordForm() {
             </Button>
 
             <Link
-              href="/login"
+              href="auth/login"
               className="flex items-center justify-center gap-2 text-slate-600 hover:text-emerald-600 transition-colors text-sm font-bold h-12"
             >
               <ArrowLeft className="w-4 h-4" />
