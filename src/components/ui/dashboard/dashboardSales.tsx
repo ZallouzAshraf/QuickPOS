@@ -198,7 +198,6 @@ export default function DashboardSalesComponent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 p-6">
       <div className="max-w-[1800px] mx-auto">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
             Point de Vente
@@ -208,10 +207,8 @@ export default function DashboardSalesComponent() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Products Section */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Search and Filters */}
+        <div className="flex flex-row gap-4 h-[100dvh] overflow-hidden">
+          <div className="flex-1 overflow-y-auto pr-3 space-y-2">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
@@ -247,7 +244,6 @@ export default function DashboardSalesComponent() {
                 </div>
               </div>
 
-              {/* Category Filters */}
               <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
                 {categories.map((category) => (
                   <button
@@ -265,7 +261,6 @@ export default function DashboardSalesComponent() {
               </div>
             </div>
 
-            {/* Products Grid/List */}
             <div
               className={`
               ${
@@ -294,10 +289,8 @@ export default function DashboardSalesComponent() {
             )}
           </div>
 
-          {/* Cart Section */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-lg sticky top-6">
-              {/* Cart Header */}
+          <div className="w-[350px] flex-shrink-0 h-[100dvh] sticky top-0">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-lg h-full flex flex-col">
               <div className="p-6 border-b border-slate-200">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -311,8 +304,7 @@ export default function DashboardSalesComponent() {
                 </div>
               </div>
 
-              {/* Cart Items */}
-              <div className="p-4 max-h-[400px] overflow-y-auto space-y-3">
+              <div className="p-4 flex-1 overflow-y-auto space-y-3">
                 {cart.length === 0 ? (
                   <div className="text-center py-12">
                     <ShoppingCart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
@@ -335,7 +327,6 @@ export default function DashboardSalesComponent() {
 
               {cart.length > 0 && (
                 <>
-                  {/* Discount */}
                   <div className="p-4 border-t border-slate-200">
                     <div className="flex items-center gap-3">
                       <Percent className="w-5 h-5 text-emerald-600" />
@@ -353,7 +344,6 @@ export default function DashboardSalesComponent() {
                     </div>
                   </div>
 
-                  {/* Totals */}
                   <div className="p-6 border-t border-slate-200 space-y-3">
                     <div className="flex justify-between text-slate-600">
                       <span>Sous-total</span>
@@ -385,7 +375,6 @@ export default function DashboardSalesComponent() {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="p-4 border-t border-slate-200 space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <Button
@@ -424,7 +413,6 @@ export default function DashboardSalesComponent() {
           </div>
         </div>
 
-        {/* Payment Modal */}
         {showPaymentModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8">
@@ -470,7 +458,6 @@ export default function DashboardSalesComponent() {
           </div>
         )}
 
-        {/* Sales History */}
         {salesHistory.length > 0 && (
           <div className="mt-8 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
             <h2 className="text-xl font-bold text-slate-800 mb-4">
