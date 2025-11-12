@@ -16,22 +16,28 @@ export const ProductCard = ({
     return (
       <button
         onClick={() => onAdd(product)}
-        className="w-full flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:border-emerald-500 hover:shadow-lg transition-all"
+        className="w-full flex items-center justify-between cursor-pointer gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-emerald-500 hover:shadow-md transition-all"
       >
-        <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <Receipt className="w-8 h-8 text-emerald-600" />
-        </div>
-        <div className="flex-1 text-left">
-          <h3 className="font-bold text-slate-800">{product.name}</h3>
-          <p className="text-sm text-slate-500">{product.category}</p>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg flex items-center justify-center">
+            <Receipt className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div className="min-w-0 text-left">
+            <h3 className="font-semibold text-slate-800 truncate">
+              {product.name}
+            </h3>
+            <p className="text-xs text-slate-500 truncate">
+              {product.category}
+            </p>
+          </div>
         </div>
         <div className="text-right">
-          <p className="text-xl font-bold text-emerald-600">
+          <p className="text-base font-semibold text-emerald-600">
             {product.price.toFixed(2)} TND
           </p>
           <p
             className={`text-xs ${
-              isLowStock ? "text-red-600" : "text-slate-500"
+              isLowStock ? "text-red-600 font-medium" : "text-slate-400"
             }`}
           >
             Stock: {product.stock}
@@ -44,26 +50,34 @@ export const ProductCard = ({
   return (
     <button
       onClick={() => onAdd(product)}
-      className="bg-white rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-xl transition-all overflow-hidden group"
+      className="bg-white rounded-xl border cursor-pointer border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all overflow-hidden group"
     >
-      <div className="h-40 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center relative">
-        <Receipt className="w-16 h-16 text-emerald-600 group-hover:scale-110 transition-transform" />
+      <div className="h-28 bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center relative">
+        <Receipt className="w-10 h-10 text-emerald-600 group-hover:scale-110 transition-transform" />
         {isLowStock && (
-          <span className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+          <span className="absolute top-2 right-2 px-2 py-0.5 bg-red-500 text-white text-[10px] font-semibold rounded-full">
             Stock bas
           </span>
         )}
       </div>
-      <div className="p-4">
-        <span className="inline-block px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full mb-2">
+      <div className="p-3">
+        <h3 className="font-semibold text-slate-800 text-sm truncate">
+          {product.name}
+        </h3>
+        <p className="text-xs text-slate-500 mb-2 truncate">
           {product.category}
-        </span>
-        <h3 className="font-bold text-slate-800 mb-2">{product.name}</h3>
+        </p>
         <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold text-emerald-600">
+          <span className="text-base font-bold text-emerald-600">
             {product.price.toFixed(2)} TND
           </span>
-          <span className="text-sm text-slate-500">Stock: {product.stock}</span>
+          <span
+            className={`text-xs ${
+              isLowStock ? "text-red-600 font-medium" : "text-slate-400"
+            }`}
+          >
+            {product.stock} en stock
+          </span>
         </div>
       </div>
     </button>
