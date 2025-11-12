@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { TabKey } from "@/src/core/types/types";
 import { useAppContext } from "@/src/core/context/AppContext";
+import { MENU_ITEMS } from "@/src/core/utils/constants";
 
 interface SidebarProps {
   activeTab: string;
@@ -25,15 +26,6 @@ export const Sidebar = ({
   setIsMobileOpen,
 }: SidebarProps) => {
   const { setIsSalesMode } = useAppContext();
-
-  const menuItems = [
-    { id: "overview", label: "Vue d'ensemble", icon: TrendingUp },
-    { id: "clients", label: "Clients", icon: Users },
-    { id: "products", label: "Produits", icon: Package },
-    { id: "invoices", label: "Factures", icon: FileText },
-    { id: "sales", label: "Point de Vente", icon: ShoppingCart },
-    { id: "settings", label: "Paramètres", icon: Settings },
-  ];
 
   return (
     <>
@@ -78,7 +70,7 @@ export const Sidebar = ({
           </div>
 
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {menuItems.map((item) => {
+            {MENU_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
