@@ -1,11 +1,17 @@
-export interface Client {
+export type Client = {
   id: string;
   name: string;
+  type: "Particulier" | "Entreprise";
   email: string;
   phone: string;
-  totalPurchases: number;
-  lastPurchase: string;
-}
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  discountRate: number;
+  status: "Actif" | "Inactif";
+  createdAt: string;
+};
 
 export interface Product {
   id: string;
@@ -40,6 +46,5 @@ export interface ProductDetails {
   stock: number;
   image?: string;
 }
-
 
 export type TabKey = "overview" | "clients" | "products" | "invoices" | "sales" | "settings";

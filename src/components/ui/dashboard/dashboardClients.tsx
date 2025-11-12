@@ -4,36 +4,62 @@ import { Input } from "@/components/ui/input";
 import { Client } from "@/src/core/types/types";
 import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
+import EditClientModal from "../../common/Modal/userModal";
 
 export const DashboardClientsComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  const clients: Client[] = [
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clients, setClients] = useState<Client[]>([
     {
       id: "1",
       name: "Ahmed Ben Ali",
+      type: "Particulier",
       email: "ahmed@email.com",
       phone: "+216 98 123 456",
-      totalPurchases: 5420,
-      lastPurchase: "2024-03-15",
+      address: "Rue Habib Bourguiba",
+      city: "Tunis",
+      postalCode: "1000",
+      country: "Tunisie",
+      discountRate: 0,
+      status: "Actif",
+      createdAt: "2024-03-15",
     },
     {
       id: "2",
       name: "Fatma Trabelsi",
+      type: "Particulier",
       email: "fatma@email.com",
       phone: "+216 22 654 321",
-      totalPurchases: 3280,
-      lastPurchase: "2024-03-14",
+      address: "Avenue de la République",
+      city: "Sfax",
+      postalCode: "3000",
+      country: "Tunisie",
+      discountRate: 0,
+      status: "Actif",
+      createdAt: "2024-03-14",
     },
     {
       id: "3",
       name: "Mohamed Gharbi",
+      type: "Particulier",
       email: "mohamed@email.com",
       phone: "+216 55 789 012",
-      totalPurchases: 1950,
-      lastPurchase: "2024-03-10",
+      address: "Rue de la Liberté",
+      city: "Sousse",
+      postalCode: "4000",
+      country: "Tunisie",
+      discountRate: 0,
+      status: "Actif",
+      createdAt: "2024-03-10",
     },
-  ];
+  ]);
+
+  const handleSaveClient = (updatedClient: Client) => {
+    setClients((prev) =>
+      prev.map((c) => (c.id === updatedClient.id ? updatedClient : c))
+    );
+    setSelectedClient(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -65,10 +91,10 @@ export const DashboardClientsComponent = () => {
                   Contact
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                  Total achats
+                  Phone
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                  Dernier achat
+                  Adresse
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
                   Actions
@@ -100,23 +126,22 @@ export const DashboardClientsComponent = () => {
                       <p className="text-slate-500">{client.phone}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="font-bold text-emerald-600">
-                      {client.totalPurchases} TND
-                    </span>
-                  </td>
                   <td className="px-6 py-4 text-slate-600 text-sm">
-                    {client.lastPurchase}
+                    {client.phone}
                   </td>
+                  <td className="px-6 py-4">
+                    <span className=" text-slate-600">{client.address}</span>
+                  </td>
+
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <button
+                        onClick={() => setSelectedClient(client)}
+                        className="p-2 text-slate-600 cursor-pointer hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <button className="p-2 text-slate-600 cursor-pointer hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -127,6 +152,15 @@ export const DashboardClientsComponent = () => {
           </table>
         </div>
       </div>
+
+      {selectedClient && (
+        <EditClientModal
+          client={selectedClient}
+          open={!!selectedClient}
+          setOpen={() => setSelectedClient(null)}
+          onSave={handleSaveClient}
+        />
+      )}
     </div>
   );
 };
