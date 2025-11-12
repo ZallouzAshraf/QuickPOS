@@ -19,7 +19,7 @@ export interface Product {
   category: string;
   price: number;
   stock: number;
-  status: 'in_stock' | 'low_stock' | 'out_of_stock';
+  status: "in_stock" | "low_stock" | "out_of_stock";
 }
 
 export interface Invoice {
@@ -27,7 +27,7 @@ export interface Invoice {
   clientName: string;
   date: string;
   amount: number;
-  status: 'paid' | 'pending' | 'overdue';
+  status: "paid" | "pending" | "overdue";
 }
 
 export interface Sale {
@@ -47,4 +47,43 @@ export interface ProductDetails {
   image?: string;
 }
 
-export type TabKey = "overview" | "clients" | "products" | "invoices" | "sales" | "settings";
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: "Admin" | "Employee";
+  status: "Actif" | "Inactif";
+  createdAt: string;
+};
+
+export type CreateUserDTO = {
+  name: string;
+  email: string;
+  password: string;
+  role: "Admin" | "Employee";
+};
+
+export type License = {
+  id: string;
+  key: string;
+  active: boolean;
+  expirationDate: string;
+  createdAt: string;
+};
+
+export type CreateLicenseDTO = {
+  key: string;
+  expirationDate: string;
+};
+
+export type UpdateLicenseDTO = Partial<Omit<License, "id" | "createdAt">>;
+
+export type UpdateUserDTO = Partial<Omit<User, "id" | "createdAt">>;
+
+export type TabKey =
+  | "overview"
+  | "clients"
+  | "products"
+  | "invoices"
+  | "sales"
+  | "settings";
