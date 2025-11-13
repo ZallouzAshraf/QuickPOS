@@ -1,29 +1,26 @@
+export enum ClientType {
+  INDIVIDUAL = "Particulier",
+  COMPANY = "Entreprise",
+}
+
 export type Client = {
-  id: string;
-  name: string;
-  type: "Particulier" | "Entreprise";
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  country: string;
+  _id: string;
+  firstName: string;
+  lastName: string;
+  type: ClientType;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
   discountRate: number;
-  status: "Actif" | "Inactif";
+  status: "active" | "inactive";
   createdAt: string;
 };
 
-export interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: "in_stock" | "low_stock" | "out_of_stock";
-}
-
 export interface Invoice {
-  id: string;
+  _id: string;
   clientName: string;
   date: string;
   amount: number;
@@ -31,24 +28,27 @@ export interface Invoice {
 }
 
 export interface Sale {
-  id: string;
+  _id: string;
   product: string;
   quantity: number;
   amount: number;
   date: string;
 }
 
-export interface ProductDetails {
-  id: string;
+export interface Product {
+  _id: string;
+  brand: string;
   name: string;
+  description: string;
   price: number;
   category: string;
   stock: number;
+  createdAt: string;
   image?: string;
 }
 
 export type User = {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: "Admin" | "Employee";
@@ -64,7 +64,7 @@ export type CreateUserDTO = {
 };
 
 export type License = {
-  id: string;
+  _id: string;
   key: string;
   active: boolean;
   expirationDate: string;
