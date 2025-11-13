@@ -51,7 +51,10 @@ export default function EditClientModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-slate-50 to-blue-50/30 border-slate-200/60 shadow-xl p-10">
+      <DialogContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="sm:max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-slate-50 to-blue-50/30 border-slate-200/60 shadow-xl p-10"
+      >
         <DialogHeader className="border-b border-slate-200/60 pb-3 sticky top-0 bg-gradient-to-br from-slate-50 to-blue-50/30 z-10 ">
           <DialogTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
@@ -69,16 +72,32 @@ export default function EditClientModal({
                 Informations principales
               </h3>
               <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label className="text-slate-700 font-medium text-xs">
-                    Nom complet
-                  </Label>
-                  <Input
-                    value={form.name}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                    className="bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all h-9"
-                    placeholder="Entrez le nom complet"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-700 font-medium text-xs">
+                      Prénom
+                    </Label>
+                    <Input
+                      value={form.firstName}
+                      onChange={(e) =>
+                        handleChange("firstName", e.target.value)
+                      }
+                      className="bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all h-9"
+                      placeholder="Entrez le prénom"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-700 font-medium text-xs">
+                      Nom
+                    </Label>
+                    <Input
+                      value={form.lastName}
+                      onChange={(e) => handleChange("lastName", e.target.value)}
+                      className="bg-white border-slate-300 focus:border-blue-400 focus:ring-blue-400/20 transition-all h-9"
+                      placeholder="Entrez le nom"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-slate-700 font-medium text-xs">
@@ -226,15 +245,15 @@ export default function EditClientModal({
                     <SelectValue placeholder="Sélectionnez un statut" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="Actif">
+                    <SelectItem value="active">
                       <span className="flex items-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                         Actif
                       </span>
                     </SelectItem>
-                    <SelectItem value="Inactif">
+                    <SelectItem value="inactive">
                       <span className="flex items-center gap-2">
-                        <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                        <span className="w-2 h-2 bg-red-600 rounded-full"></span>
                         Inactif
                       </span>
                     </SelectItem>

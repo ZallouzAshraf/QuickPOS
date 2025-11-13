@@ -1,41 +1,98 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ApiService } from "@/src/core/services/apiService";
 import { Product } from "@/src/core/types/types";
-import { Edit, Package, Plus, Search, Trash2 } from "lucide-react";
+import {
+  Edit,
+  Package,
+  Plus,
+  Search,
+  Trash2,
+  Eye,
+  ShoppingCart,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import ProductModal from "../../common/Modal/productModal";
+import Image from "next/image";
 
 export const DashboardProductsComponent = () => {
-  const products: Product[] = [
-    {
-      id: "1",
-      name: "Laptop Dell XPS 13",
-      category: "Électronique",
-      price: 3500,
-      stock: 12,
-      status: "in_stock",
-    },
-    {
-      id: "2",
-      name: "iPhone 15 Pro",
-      category: "Téléphones",
-      price: 4200,
-      stock: 5,
-      status: "low_stock",
-    },
-    {
-      id: "3",
-      name: "Samsung Galaxy S24",
-      category: "Téléphones",
-      price: 3800,
-      stock: 0,
-      status: "out_of_stock",
-    },
-  ];
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const getStatusBadge = (status: Product["status"]) => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await ApiService.getProducts();
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des clients", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleAddProduct = () => {
+    setSelectedProduct(null);
+    setModalMode("add");
+    setIsModalOpen(true);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleSaveProduct = async (product: Product) => {
+    try {
+      if (modalMode === "add") {
+        const response = await ApiService.createProduct(product);
+        setProducts([...products, response.data]);
+      } else {
+        const response = await ApiService.updateProduct(product._id!, product);
+        setProducts(
+          products.map((p) => (p._id === product._id ? response.data : p))
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde du produit", error);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+      try {
+        await ApiService.deleteProduct(productId);
+        setProducts(products?.filter((p) => p._id !== productId));
+      } catch (error) {
+        console.error("Erreur lors de la suppression du produit", error);
+      }
+    }
+  };
+
+  const getStatusBadge = (stock: number) => {
+    let status: "in_stock" | "low_stock" | "out_of_stock";
+
+    if (stock === 0) status = "out_of_stock";
+    else if (stock < 20) status = "low_stock";
+    else status = "in_stock";
+
     const styles = {
-      in_stock: "bg-emerald-100 text-emerald-700",
-      low_stock: "bg-amber-100 text-amber-700",
-      out_of_stock: "bg-red-100 text-red-700",
+      in_stock:
+        "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+      low_stock: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
+      out_of_stock: "bg-red-500/10 text-red-600 border border-red-500/20",
     } as const;
 
     const labels = {
@@ -46,7 +103,7 @@ export const DashboardProductsComponent = () => {
 
     return (
       <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status]}`}
+        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide ${styles[status]}`}
       >
         {labels[status]}
       </span>
@@ -60,55 +117,104 @@ export const DashboardProductsComponent = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <Input
             placeholder="Rechercher un produit..."
-            className="pl-12 h-12 bg-white border-slate-300 rounded-xl"
+            className="pl-12 h-11 bg-white/80 backdrop-blur-sm border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button className="w-full sm:w-auto h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30">
+        <Button
+          onClick={handleAddProduct}
+          className="w-full sm:w-auto cursor-pointer h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl"
+        >
           <Plus className="w-5 h-5 mr-2" />
           Nouveau produit
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        {filteredProducts?.map((product) => (
           <div
-            key={product.id}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all overflow-hidden"
+            key={product._id}
+            className="group relative bg-gradient-to-br from-white to-slate-50/50 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 overflow-hidden"
           >
-            <div className="h-48 bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
-              <Package className="w-16 h-16 text-emerald-600" />
-            </div>
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-bold text-slate-800 mb-1">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-slate-500">{product.category}</p>
+            <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-200/50 overflow-hidden">
+              {product.image ? (
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Package className="w-12 h-12 text-slate-400" />
                 </div>
-                {getStatusBadge(product.status)}
-              </div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-2xl font-bold text-emerald-600">
-                  {product.price} TND
-                </span>
-                <span className="text-sm text-slate-600">
-                  Stock: <span className="font-semibold">{product.stock}</span>
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <button className="flex-1 py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors">
-                  <Edit className="w-4 h-4 inline mr-1" />
-                  Modifier
+              )}
+
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => handleEditProduct(product)}
+                  className="p-2 bg-white/95 hover:bg-white cursor-pointer text-slate-700 rounded-lg transition-all transform hover:scale-110"
+                >
+                  <Edit className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                  <Trash2 className="w-5 h-5" />
+                <button
+                  onClick={() => handleDeleteProduct(product._id)}
+                  className="p-2 bg-white/95 hover:bg-white cursor-pointer text-red-600 rounded-lg transition-all transform hover:scale-110"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
+              </div>
+
+              <div className="absolute top-2 right-2">
+                {getStatusBadge(product.stock)}
+              </div>
+            </div>
+
+            <div className="p-3 space-y-2">
+              <div>
+                <h3
+                  className="font-bold text-sm text-slate-800 line-clamp-1 mb-0.5 text-ellipsis"
+                  title={product.name}
+                >
+                  {product.name}
+                </h3>
+                <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wide">
+                  {product.brand}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <div>
+                  <p className="text-xs text-slate-500 font-medium">Prix</p>
+                  <p className="text-lg font-bold text-emerald-600">
+                    {product.price}
+                    <span className="text-xs ml-0.5">TND</span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-slate-500 font-medium">Stock</p>
+                  <p className="text-sm font-bold text-slate-700">
+                    {product.stock}
+                  </p>
+                </div>
+              </div>
+              <div className="pt-1">
+                <span className="inline-block px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-semibold rounded-md">
+                  {product.category}
+                </span>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      <ProductModal
+        product={selectedProduct}
+        open={isModalOpen}
+        setOpen={setIsModalOpen}
+        onSave={handleSaveProduct}
+        mode={modalMode}
+      />
     </div>
   );
 };
