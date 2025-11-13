@@ -21,6 +21,13 @@ export const DashboardProductsComponent = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -111,6 +118,8 @@ export const DashboardProductsComponent = () => {
           <Input
             placeholder="Rechercher un produit..."
             className="pl-12 h-11 bg-white/80 backdrop-blur-sm border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Button
@@ -123,7 +132,7 @@ export const DashboardProductsComponent = () => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {products?.map((product) => (
+        {filteredProducts?.map((product) => (
           <div
             key={product._id}
             className="group relative bg-gradient-to-br from-white to-slate-50/50 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 overflow-hidden"
@@ -163,7 +172,10 @@ export const DashboardProductsComponent = () => {
 
             <div className="p-3 space-y-2">
               <div>
-                <h3 className="font-bold text-sm text-slate-800 line-clamp-1 mb-0.5">
+                <h3
+                  className="font-bold text-sm text-slate-800 line-clamp-1 mb-0.5 text-ellipsis"
+                  title={product.name}
+                >
                   {product.name}
                 </h3>
                 <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wide">
