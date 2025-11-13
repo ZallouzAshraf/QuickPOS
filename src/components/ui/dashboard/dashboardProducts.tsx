@@ -1,37 +1,77 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ApiService } from "@/src/core/services/apiService";
 import { Product } from "@/src/core/types/types";
 import { Edit, Package, Plus, Search, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import ProductModal from "../../common/Modal/productModal";
 
 export const DashboardProductsComponent = () => {
-  const products: Product[] = [
-    {
-      id: "1",
-      name: "Laptop Dell XPS 13",
-      category: "Électronique",
-      price: 3500,
-      stock: 12,
-      status: "in_stock",
-    },
-    {
-      id: "2",
-      name: "iPhone 15 Pro",
-      category: "Téléphones",
-      price: 4200,
-      stock: 5,
-      status: "low_stock",
-    },
-    {
-      id: "3",
-      name: "Samsung Galaxy S24",
-      category: "Téléphones",
-      price: 3800,
-      stock: 0,
-      status: "out_of_stock",
-    },
-  ];
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
 
-  const getStatusBadge = (status: Product["status"]) => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await ApiService.getProducts();
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des clients", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleAddProduct = () => {
+    setSelectedProduct(null);
+    setModalMode("add");
+    setIsModalOpen(true);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleSaveProduct = async (product: Product) => {
+    try {
+      if (modalMode === "add") {
+        const response = await ApiService.createProduct(product);
+        setProducts([...products, response.data]);
+      } else {
+        const response = await ApiService.updateProduct(product._id!, product);
+        setProducts(
+          products.map((p) => (p._id === product._id ? response.data : p))
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde du produit", error);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+      try {
+        await ApiService.deleteProduct(productId);
+        setProducts(products?.filter((p) => p._id !== productId));
+      } catch (error) {
+        console.error("Erreur lors de la suppression du produit", error);
+      }
+    }
+  };
+
+  const getStatusBadge = (stock: number) => {
+    let status: "in_stock" | "low_stock" | "out_of_stock";
+
+    if (stock === 0) status = "out_of_stock";
+    else if (stock < 20) status = "low_stock";
+    else status = "in_stock";
+
     const styles = {
       in_stock: "bg-emerald-100 text-emerald-700",
       low_stock: "bg-amber-100 text-amber-700",
@@ -63,16 +103,19 @@ export const DashboardProductsComponent = () => {
             className="pl-12 h-12 bg-white border-slate-300 rounded-xl"
           />
         </div>
-        <Button className="w-full sm:w-auto h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30">
+        <Button
+          onClick={handleAddProduct}
+          className="w-full sm:w-auto cursor-pointer h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30"
+        >
           <Plus className="w-5 h-5 mr-2" />
           Nouveau produit
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
+        {products?.map((product) => (
           <div
-            key={product.id}
+            key={product._id}
             className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all overflow-hidden"
           >
             <div className="h-48 bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
@@ -86,7 +129,7 @@ export const DashboardProductsComponent = () => {
                   </h3>
                   <p className="text-sm text-slate-500">{product.category}</p>
                 </div>
-                {getStatusBadge(product.status)}
+                {getStatusBadge(product.stock)}
               </div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-2xl font-bold text-emerald-600">
@@ -97,11 +140,17 @@ export const DashboardProductsComponent = () => {
                 </span>
               </div>
               <div className="flex gap-2">
-                <button className="flex-1 py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors">
+                <button
+                  onClick={() => handleEditProduct(product)}
+                  className="flex-1 py-2 px-4 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors"
+                >
                   <Edit className="w-4 h-4 inline mr-1" />
                   Modifier
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                <button
+                  onClick={() => handleDeleteProduct(product._id)}
+                  className="p-2 text-red-600 cursor-pointer hover:bg-red-50 rounded-xl transition-colors"
+                >
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>
@@ -109,6 +158,13 @@ export const DashboardProductsComponent = () => {
           </div>
         ))}
       </div>
+      <ProductModal
+        product={selectedProduct}
+        open={isModalOpen}
+        setOpen={setIsModalOpen}
+        onSave={handleSaveProduct}
+        mode={modalMode}
+      />
     </div>
   );
 };

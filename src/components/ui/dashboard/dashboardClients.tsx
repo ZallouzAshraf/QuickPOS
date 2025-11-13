@@ -3,62 +3,43 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Client } from "@/src/core/types/types";
 import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditClientModal from "../../common/Modal/userModal";
+import { ApiService } from "@/src/core/services/apiService";
 
 export const DashboardClientsComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [clients, setClients] = useState<Client[]>([
-    {
-      id: "1",
-      name: "Ahmed Ben Ali",
-      type: "Particulier",
-      email: "ahmed@email.com",
-      phone: "+216 98 123 456",
-      address: "Rue Habib Bourguiba",
-      city: "Tunis",
-      postalCode: "1000",
-      country: "Tunisie",
-      discountRate: 0,
-      status: "Actif",
-      createdAt: "2024-03-15",
-    },
-    {
-      id: "2",
-      name: "Fatma Trabelsi",
-      type: "Particulier",
-      email: "fatma@email.com",
-      phone: "+216 22 654 321",
-      address: "Avenue de la République",
-      city: "Sfax",
-      postalCode: "3000",
-      country: "Tunisie",
-      discountRate: 0,
-      status: "Actif",
-      createdAt: "2024-03-14",
-    },
-    {
-      id: "3",
-      name: "Mohamed Gharbi",
-      type: "Particulier",
-      email: "mohamed@email.com",
-      phone: "+216 55 789 012",
-      address: "Rue de la Liberté",
-      city: "Sousse",
-      postalCode: "4000",
-      country: "Tunisie",
-      discountRate: 0,
-      status: "Actif",
-      createdAt: "2024-03-10",
-    },
-  ]);
+  const [clients, setClients] = useState<Client[]>();
 
-  const handleSaveClient = (updatedClient: Client) => {
-    setClients((prev) =>
-      prev.map((c) => (c.id === updatedClient.id ? updatedClient : c))
-    );
-    setSelectedClient(null);
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await ApiService.getClients();
+        setClients(response.data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des clients", error);
+      }
+    };
+
+    fetchClients();
+  }, []);
+
+  const handleSaveClient = async (updatedClient: Client) => {
+    try {
+      const response = await ApiService.updateClient(
+        updatedClient._id,
+        updatedClient
+      );
+
+      const savedClient = response.data;
+      setClients((prev) =>
+        prev?.map((c) => (c._id === savedClient._id ? savedClient : c))
+      );
+      setSelectedClient(null);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du client", error);
+    }
   };
 
   return (
@@ -102,21 +83,16 @@ export const DashboardClientsComponent = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {clients.map((client) => (
-                <tr
-                  key={client.id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
+              {clients?.map((client, index) => (
+                <tr key={index} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        {client.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                        {client.firstName.charAt(0)}
+                        {client.lastName.charAt(0)}
                       </div>
                       <span className="font-semibold text-slate-700">
-                        {client.name}
+                        {client.firstName} {client.lastName}
                       </span>
                     </div>
                   </td>
