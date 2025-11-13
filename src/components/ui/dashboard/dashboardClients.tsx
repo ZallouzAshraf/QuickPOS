@@ -11,6 +11,14 @@ export const DashboardClientsComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clients, setClients] = useState<Client[]>();
+  const filteredClients = clients?.filter(
+    (client) =>
+      client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.phone?.includes(searchTerm) ||
+      client.address?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -83,7 +91,7 @@ export const DashboardClientsComponent = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {clients?.map((client, index) => (
+              {filteredClients?.map((client, index) => (
                 <tr key={index} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
