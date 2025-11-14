@@ -48,13 +48,17 @@ export interface Product {
   image?: string;
 }
 
-export type User = {
+export type UserDTO = {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
   email: string;
-  role: "Admin" | "Employee";
+  password: string;
+  phone?: string;
   status: "Actif" | "Inactif";
   createdAt: string;
+  updatedAt?: string;
 };
 
 export type CreateUserDTO = {
@@ -100,7 +104,7 @@ export interface UpdateCategoryItemDto {
 
 export type UpdateLicenseDTO = Partial<Omit<License, "id" | "createdAt">>;
 
-export type UpdateUserDTO = Partial<Omit<User, "id" | "createdAt">>;
+export type UpdateUserDTO = Partial<Omit<UserDTO, "id" | "createdAt">>;
 
 export type TabKey =
   | "overview"

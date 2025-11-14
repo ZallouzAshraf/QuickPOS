@@ -6,9 +6,8 @@ import {
   License,
   Product,
   Sale,
-  UpdateCategoryDto,
   UpdateCategoryItemDto,
-  User,
+  UserDTO,
 } from "@/src/core/types/types";
 
 export const ApiService = {
@@ -16,8 +15,7 @@ export const ApiService = {
   login: (email: string, password: string) =>
     api.post("/auth/login", { email, password }),
 
-  register: (data: { name: string; email: string; password: string }) =>
-    api.post("/auth/register", data),
+  register: (data: Partial<UserDTO>) => api.post("/auth/register", data),
 
   // ----- CLIENTS -----
   getClients: () => api.get<Client[]>("/clients"),
@@ -50,10 +48,10 @@ export const ApiService = {
   deleteSale: (id: string) => api.delete(`/sales/${id}`),
 
   // ----- USERS -----
-  getUsers: () => api.get<User[]>("/users"),
-  getUserById: (id: string) => api.get<User>(`/users/${id}`),
-  createUser: (data: Partial<User>) => api.post("/users", data),
-  updateUser: (id: string, data: Partial<User>) => {
+  getUsers: () => api.get<UserDTO[]>("/users"),
+  getUserById: (id: string) => api.get<UserDTO>(`/users/${id}`),
+  createUser: (data: Partial<UserDTO>) => api.post("/users", data),
+  updateUser: (id: string, data: Partial<UserDTO>) => {
     const { _id, ...userData } = data;
     return api.patch(`/users/${id}`, userData);
   },
