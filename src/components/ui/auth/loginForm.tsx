@@ -8,8 +8,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, ShoppingCart, Mail, Lock } from "lucide-react";
 import Footer from "../../common/footer";
 import Link from "next/link";
+import { ApiService } from "@/src/core/services/apiService";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -18,19 +21,29 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        console.log("Login successful", formData);
-      } else {
-        setError("Veuillez remplir tous les champs");
-      }
+    if (!formData.email || !formData.password) {
+      setError("Veuillez remplir tous les champs");
       setLoading(false);
-    }, 1000);
+      return;
+    }
+
+    try {
+      await ApiService.login(formData.email, formData.password);
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Une erreur inconnue est survenue");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -143,7 +156,7 @@ export default function LoginForm() {
             <div className="text-center text-sm text-slate-600 font-medium">
               Pas encore de compte ?{" "}
               <Link
-                href="auth/register"
+                href="/auth/register"
                 className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors"
               >
                 Créer un compte

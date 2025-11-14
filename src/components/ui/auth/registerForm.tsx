@@ -16,27 +16,36 @@ import {
 } from "lucide-react";
 import Footer from "../../common/footer";
 import Link from "next/link";
+import { ApiService } from "@/src/core/services/apiService";
+import { UserDTO } from "@/src/core/types/types";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
-    businessName: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    company: "",
     password: "",
     confirmPassword: "",
+    status: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (
-      !formData.fullName ||
-      !formData.businessName ||
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.company ||
       !formData.email ||
       !formData.password ||
       !formData.confirmPassword
@@ -50,16 +59,28 @@ export default function RegisterForm() {
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
-      return;
-    }
-
     setLoading(true);
-    setTimeout(() => {
-      console.log("Registration successful", formData);
+
+    try {
+      const payload: Partial<UserDTO> = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        company: formData.company,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      await ApiService.register(payload);
+      router.push("/auth/login");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log("Une erreur inconnue est survenue");
+      }
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -90,28 +111,50 @@ export default function RegisterForm() {
               </Alert>
             )}
 
-            <div className="space-y-2">
-              <Label
-                htmlFor="fullName"
-                className="text-slate-700 text-sm font-semibold"
-              >
-                Nom complet
-              </Label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="Jean Dupont"
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
-                  }
-                  className="pl-12 h-14 bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl font-medium"
-                />
+            <div className="flex gap-4">
+              <div className="flex-1 space-y-2">
+                <Label
+                  htmlFor="firstName"
+                  className="text-slate-700 text-sm font-semibold"
+                >
+                  Prénom
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    id="firstName"
+                    type="text"
+                    placeholder="Jean"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    className="pl-12 h-14 bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl font-medium"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label
+                  htmlFor="lastName"
+                  className="text-slate-700 text-sm font-semibold"
+                >
+                  Nom
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Dupont"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                    className="pl-12 h-14 bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl font-medium"
+                  />
+                </div>
               </div>
             </div>
-
             <div className="space-y-2">
               <Label
                 htmlFor="businessName"
@@ -124,16 +167,15 @@ export default function RegisterForm() {
                 <Input
                   id="businessName"
                   type="text"
-                  placeholder="Ma Boutique"
-                  value={formData.businessName}
+                  placeholder="Ma société"
+                  value={formData.company}
                   onChange={(e) =>
-                    setFormData({ ...formData, businessName: e.target.value })
+                    setFormData({ ...formData, company: e.target.value })
                   }
                   className="pl-12 h-14 bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500/20 rounded-xl font-medium"
                 />
               </div>
             </div>
-
             <div className="space-y-2">
               <Label
                 htmlFor="email"
