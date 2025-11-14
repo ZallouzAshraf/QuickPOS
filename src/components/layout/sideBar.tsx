@@ -1,13 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import {
-  ShoppingCart,
-  Users,
-  Package,
-  FileText,
-  TrendingUp,
-  Settings,
-  X,
-} from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import { TabKey } from "@/src/core/types/types";
 import { useAppContext } from "@/src/core/context/AppContext";
 import { MENU_ITEMS } from "@/src/core/utils/constants";
@@ -38,14 +30,14 @@ export const Sidebar = ({
 
       <aside
         className={`
-        fixed lg:static inset-y-0 left-0 z-50
+        fixed lg:sticky inset-y-0 left-0 z-50 lg:top-0 lg:h-screen
         w-72 bg-white border-r border-slate-200 
         transform transition-transform duration-300 ease-in-out
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
       >
         <div className="h-full flex flex-col">
-          <div className="p-6 border-b border-slate-200">
+          <div className="p-6 border-b border-slate-200 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -99,8 +91,7 @@ export const Sidebar = ({
               );
             })}
           </nav>
-
-          <div className="p-4 border-t border-slate-200">
+          <div className="p-4 border-t border-slate-200 flex-shrink-0">
             <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl">
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold">
                 JD

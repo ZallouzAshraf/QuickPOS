@@ -54,7 +54,6 @@ function DashboardLayout() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
       {isSalesMode ? (
-        // MODE POS - Plein écran sans sidebar
         <div className="h-screen flex flex-col">
           <DashboardHeader
             isMobileOpen={isMobileOpen}
@@ -63,7 +62,6 @@ function DashboardLayout() {
           {renderContent()}
         </div>
       ) : (
-        // MODE DASHBOARD - Avec sidebar
         <div className="flex">
           <Sidebar
             activeTab={activeTab}
