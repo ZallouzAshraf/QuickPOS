@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ApiService } from "@/src/core/services/apiService";
 import { Product } from "@/src/core/types/types";
 import {
   Package,
@@ -35,21 +36,31 @@ interface ProductModalProps {
   product?: Product | null;
   open: boolean;
   setOpen: (open: boolean) => void;
-  onSave: (product: Product) => void;
+  onSave: (product: Partial<Product>) => void;
   mode: "add" | "edit";
 }
 
-const defaultProduct: Product = {
-  _id: "",
+const defaultProduct: Partial<Product> = {
   name: "",
   brand: "",
   description: "",
   category: "",
   price: 0,
   stock: 0,
-  createdAt: "",
   image: "",
 };
+
+interface Category {
+  _id: string;
+  name: string;
+  isActive: boolean;
+}
+
+interface UserCategories {
+  _id: string;
+  userId: string;
+  categories: Category[];
+}
 
 export default function ProductModal({
   product,
@@ -59,6 +70,26 @@ export default function ProductModal({
   mode,
 }: ProductModalProps) {
   const [form, setForm] = useState(defaultProduct);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = (await ApiService.getCategories()) as {
+          data: UserCategories[];
+        };
+        const allCategories: Category[] = response.data.flatMap(
+          (user) => user.categories
+        );
+        const activeCategories = allCategories.filter((c) => c.isActive);
+        setCategories(activeCategories);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des catégories", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -145,12 +176,11 @@ export default function ProductModal({
                       <SelectValue placeholder="Sélectionnez une catégorie" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
-                      <SelectItem value="Électronique">Électronique</SelectItem>
-                      <SelectItem value="Mobilier">Mobilier</SelectItem>
-                      <SelectItem value="Vêtements">Vêtements</SelectItem>
-                      <SelectItem value="Alimentaire">Alimentaire</SelectItem>
-                      <SelectItem value="Services">Services</SelectItem>
-                      <SelectItem value="Autre">Autre</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat._id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

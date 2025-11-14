@@ -17,6 +17,7 @@ export type Client = {
   discountRate: number;
   status: "active" | "inactive";
   createdAt: string;
+  updatedAt?: string;
 };
 
 export interface Invoice {
@@ -47,13 +48,17 @@ export interface Product {
   image?: string;
 }
 
-export type User = {
+export type UserDTO = {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
   email: string;
-  role: "Admin" | "Employee";
+  password: string;
+  phone?: string;
   status: "Actif" | "Inactif";
   createdAt: string;
+  updatedAt?: string;
 };
 
 export type CreateUserDTO = {
@@ -76,9 +81,30 @@ export type CreateLicenseDTO = {
   expirationDate: string;
 };
 
+export interface CreateCategoryDto {
+  name: string;
+  userId: string;
+  items?: string[];
+}
+
+export interface UpdateCategoryDto {
+  _id: string;
+  name?: string;
+  items?: string[];
+}
+
+export interface AddCategoryItemDto {
+  itemName: string;
+}
+
+export interface UpdateCategoryItemDto {
+  oldItemName: string;
+  newItemName: string;
+}
+
 export type UpdateLicenseDTO = Partial<Omit<License, "id" | "createdAt">>;
 
-export type UpdateUserDTO = Partial<Omit<User, "id" | "createdAt">>;
+export type UpdateUserDTO = Partial<Omit<UserDTO, "id" | "createdAt">>;
 
 export type TabKey =
   | "overview"
