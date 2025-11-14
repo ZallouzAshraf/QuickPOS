@@ -54,7 +54,7 @@ export const DashboardProductsComponent = () => {
     setIsModalOpen(true);
   };
 
-  const handleSaveProduct = async (product: Product) => {
+  const handleSaveProduct = async (product: Partial<Product>) => {
     try {
       if (modalMode === "add") {
         const response = await ApiService.createProduct(product);

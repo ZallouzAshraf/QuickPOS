@@ -17,6 +17,7 @@ export type Client = {
   discountRate: number;
   status: "active" | "inactive";
   createdAt: string;
+  updatedAt?: string;
 };
 
 export interface Invoice {
@@ -75,6 +76,27 @@ export type CreateLicenseDTO = {
   key: string;
   expirationDate: string;
 };
+
+export interface CreateCategoryDto {
+  name: string;
+  userId: string;
+  items?: string[];
+}
+
+export interface UpdateCategoryDto {
+  _id: string;
+  name?: string;
+  items?: string[];
+}
+
+export interface AddCategoryItemDto {
+  itemName: string;
+}
+
+export interface UpdateCategoryItemDto {
+  oldItemName: string;
+  newItemName: string;
+}
 
 export type UpdateLicenseDTO = Partial<Omit<License, "id" | "createdAt">>;
 
