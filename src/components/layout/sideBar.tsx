@@ -1,6 +1,6 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { ShoppingCart, X, LogOut } from "lucide-react";
-import { TabKey } from "@/src/core/types/types";
+import { TabKey, UserDTO } from "@/src/core/types/types";
 import { useAppContext } from "@/src/core/context/AppContext";
 import { MENU_ITEMS } from "@/src/core/utils/constants";
 import { ApiService } from "@/src/core/services/apiService";
@@ -22,11 +22,20 @@ export const Sidebar = ({
   const router = useRouter();
   const { setIsSalesMode } = useAppContext();
   const [showLogout, setShowLogout] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserDTO>();
 
   const handleLogout = async () => {
     await ApiService.logout();
     router.push("/auth/login");
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await ApiService.currentUser();
+      setCurrentUser(response.data);
+    };
+    fetchUser();
+  }, []);
 
   return (
     <>
@@ -112,9 +121,11 @@ export const Sidebar = ({
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-slate-700">
-                    Ashraf Zallouz
+                    {currentUser?.firstName} {currentUser?.lastName}
                   </p>
-                  <p className="text-xs text-slate-500">Ma Boutique</p>
+                  <p className="text-xs text-slate-500">
+                    {currentUser?.company}{" "}
+                  </p>
                 </div>
               </button>
 

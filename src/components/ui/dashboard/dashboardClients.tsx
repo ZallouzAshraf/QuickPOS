@@ -10,7 +10,9 @@ import { ApiService } from "@/src/core/services/apiService";
 export const DashboardClientsComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [clients, setClients] = useState<Client[]>();
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const filteredClients = clients?.filter(
     (client) =>
       client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,20 +35,31 @@ export const DashboardClientsComponent = () => {
     fetchClients();
   }, []);
 
-  const handleSaveClient = async (updatedClient: Client) => {
-    try {
-      const response = await ApiService.updateClient(
-        updatedClient._id,
-        updatedClient
-      );
+  const handleAddClient = () => {
+    setSelectedClient(null);
+    setModalMode("add");
+    setIsModalOpen(true);
+  };
 
-      const savedClient = response.data;
-      setClients((prev) =>
-        prev?.map((c) => (c._id === savedClient._id ? savedClient : c))
-      );
-      setSelectedClient(null);
+  const handleEditClient = (client: Client) => {
+    setSelectedClient(client);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleSaveClient = async (client: Partial<Client>) => {
+    try {
+      if (modalMode === "add") {
+        const response = await ApiService.createClient(client);
+        setClients([...clients, response.data]);
+      } else {
+        const response = await ApiService.updateClient(client._id!, client);
+        setClients(
+          clients.map((p) => (p._id === client._id ? response.data : p))
+        );
+      }
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du client", error);
+      console.error("Erreur lors de la sauvegarde du produit", error);
     }
   };
 
@@ -62,7 +75,10 @@ export const DashboardClientsComponent = () => {
             className="pl-12 h-12 bg-white border-slate-300 rounded-xl"
           />
         </div>
-        <Button className="w-full sm:w-auto h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30">
+        <Button
+          onClick={handleAddClient}
+          className="w-full sm:w-auto h-12 cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30"
+        >
           <Plus className="w-5 h-5 mr-2" />
           Nouveau client
         </Button>
@@ -120,7 +136,7 @@ export const DashboardClientsComponent = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => setSelectedClient(client)}
+                        onClick={() => handleEditClient(client)}
                         className="p-2 text-slate-600 cursor-pointer hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                       >
                         <Edit className="w-4 h-4" />
@@ -137,14 +153,13 @@ export const DashboardClientsComponent = () => {
         </div>
       </div>
 
-      {selectedClient && (
-        <EditClientModal
-          client={selectedClient}
-          open={!!selectedClient}
-          setOpen={() => setSelectedClient(null)}
-          onSave={handleSaveClient}
-        />
-      )}
+      <EditClientModal
+        client={selectedClient}
+        open={isModalOpen}
+        setOpen={setIsModalOpen}
+        onSave={handleSaveClient}
+        mode={modalMode}
+      />
     </div>
   );
 };
