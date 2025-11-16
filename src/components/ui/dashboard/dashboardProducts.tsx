@@ -15,6 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import ProductModal from "../../common/Modal/productModal";
 import Image from "next/image";
+import { ConfirmationDialog } from "../../common/Modal/confirmationDialog";
 
 export const DashboardProductsComponent = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -22,6 +23,7 @@ export const DashboardProductsComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [searchTerm, setSearchTerm] = useState("");
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -70,14 +72,16 @@ export const DashboardProductsComponent = () => {
     }
   };
 
-  const handleDeleteProduct = async (productId: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
-      try {
-        await ApiService.deleteProduct(productId);
-        setProducts(products?.filter((p) => p._id !== productId));
-      } catch (error) {
-        console.error("Erreur lors de la suppression du produit", error);
-      }
+  const handleDeleteProduct = async () => {
+    if (!productToDelete?._id) return;
+
+    try {
+      await ApiService.deleteProduct(productToDelete._id);
+      setProducts(products.filter((p) => p._id !== productToDelete._id));
+    } catch (error) {
+      console.error("Erreur lors de la suppression du produit", error);
+    } finally {
+      setProductToDelete(null);
     }
   };
 
@@ -158,7 +162,7 @@ export const DashboardProductsComponent = () => {
                   <Edit className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => handleDeleteProduct(product._id)}
+                  onClick={() => setProductToDelete(product)}
                   className="p-2 bg-white/95 hover:bg-white cursor-pointer text-red-600 rounded-lg transition-all transform hover:scale-110"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -207,6 +211,21 @@ export const DashboardProductsComponent = () => {
           </div>
         ))}
       </div>
+
+      <ConfirmationDialog
+        open={!!productToDelete}
+        onClose={() => setProductToDelete(null)}
+        title="Supprimer le prduit ?"
+        description={
+          <>
+            Cette action est irréversible. Voulez-vous vraiment supprimer{" "}
+            <strong>{productToDelete?.name}</strong> ?
+          </>
+        }
+        confirmText="Supprimer"
+        confirmClassName="bg-red-600 hover:bg-red-700 text-white"
+        onConfirm={handleDeleteProduct}
+      />
 
       <ProductModal
         product={selectedProduct}
