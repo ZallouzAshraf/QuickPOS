@@ -90,4 +90,8 @@ export const ApiService = {
 
   deleteCategoryItem: (userId: string, categoryName: string) =>
     api.delete(`/categories/user/${userId}/item/${categoryName}`),
+
+  // ----- EXTERNE API  -----
+  getPhoneCodes: () =>
+    api.get("https://restcountries.com/v3.1/all?fields=name,idd"),
 };

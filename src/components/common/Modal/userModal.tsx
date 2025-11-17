@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ApiService } from "@/src/core/services/apiService";
 import { Client } from "@/src/core/types/types";
 import { User, Mail, Phone, MapPin, Percent, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -53,6 +54,16 @@ const defaultClient: Partial<Client> = {
   status: ClientStatus.ACTIVE || ClientStatus.INACTIVE,
 };
 
+interface CountryPhone {
+  name: {
+    common: string;
+  };
+  idd: {
+    root: string;
+    suffixes: string[];
+  };
+}
+
 export default function EditClientModal({
   client,
   open,
@@ -61,6 +72,10 @@ export default function EditClientModal({
   mode,
 }: EditClientModalProps) {
   const [form, setForm] = useState<Partial<Client>>(defaultClient);
+  const [phoneCodes, setPhoneCodes] = useState<
+    { code: string; country: string }[]
+  >([]);
+  const [selectedCode, setSelectedCode] = useState<string>("+216");
 
   useEffect(() => {
     if (!open) return;
@@ -85,6 +100,29 @@ export default function EditClientModal({
   };
 
   const isEdit = mode === "edit";
+
+  useEffect(() => {
+    const fetchCodes = async () => {
+      try {
+        const res = await ApiService.getPhoneCodes();
+        const codes: { code: string; country: string }[] = res.data
+          .map((c: CountryPhone | null) => {
+            if (!c) return;
+            if (!c.idd?.root || !c.idd?.suffixes) return null;
+            return {
+              code: c.idd.root + c.idd.suffixes[0],
+              country: c.name.common,
+            };
+          })
+          .filter(Boolean);
+        codes.sort((a, b) => a.country.localeCompare(b.country));
+        setPhoneCodes(codes);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchCodes();
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -180,12 +218,29 @@ export default function EditClientModal({
                     <Phone className="w-3 h-3 text-slate-500" />
                     Téléphone
                   </Label>
-                  <Input
-                    value={form.phone}
-                    onChange={(e) => handleChange("phone", e.target.value)}
-                    className="bg-white border-slate-300 focus:border-indigo-400 focus:ring-indigo-400/20 transition-all h-9"
-                    placeholder="+216 XX XXX XXX"
-                  />
+                  <div className="flex gap-2">
+                    <Select
+                      value={selectedCode}
+                      onValueChange={(value) => setSelectedCode(value)}
+                    >
+                      <SelectTrigger className="h-9 bg-white border-slate-300 focus:border-indigo-400 focus:ring-indigo-400/20">
+                        <SelectValue placeholder="+216" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white max-h-60 overflow-y-auto">
+                        {phoneCodes.map((c, index) => (
+                          <SelectItem key={index} value={c.code}>
+                            {c.country} ({c.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={form.phone}
+                      onChange={(e) => handleChange("phone", e.target.value)}
+                      className="bg-white border-slate-300 focus:border-indigo-400 focus:ring-indigo-400/20 transition-all h-9 flex-1"
+                      placeholder="712345678"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
