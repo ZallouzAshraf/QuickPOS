@@ -22,23 +22,58 @@ import { User, Mail, Phone, MapPin, Percent, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface EditClientModalProps {
-  client: Client;
+  client?: Client | null;
   open: boolean;
   setOpen: (open: boolean) => void;
-  onSave: (updatedClient: Client) => void;
+  onSave: (updatedClient: Partial<Client>) => void;
+  mode: "add" | "edit";
 }
+
+export enum ClientType {
+  INDIVIDUAL = "Particulier",
+  COMPANY = "Entreprise",
+}
+
+export enum ClientStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+}
+
+const defaultClient: Partial<Client> = {
+  firstName: "",
+  lastName: "",
+  type: ClientType.INDIVIDUAL || ClientType.COMPANY,
+  email: "",
+  phone: "",
+  address: "",
+  city: "",
+  postalCode: "",
+  country: "",
+  discountRate: 0,
+  status: ClientStatus.ACTIVE || ClientStatus.INACTIVE,
+};
 
 export default function EditClientModal({
   client,
   open,
   setOpen,
   onSave,
+  mode,
 }: EditClientModalProps) {
-  const [form, setForm] = useState(client);
+  const [form, setForm] = useState<Partial<Client>>(defaultClient);
 
   useEffect(() => {
-    setForm(client);
-  }, [client]);
+    if (!open) return;
+    const timer = setTimeout(() => {
+      if (mode === "edit" && client) {
+        setForm(client);
+      } else {
+        setForm(defaultClient);
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [mode, client, open]);
 
   const handleChange = (field: keyof Client, value: string | number) => {
     setForm({ ...form, [field]: value });
@@ -48,6 +83,8 @@ export default function EditClientModal({
     onSave(form);
     setOpen(false);
   };
+
+  const isEdit = mode === "edit";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -60,7 +97,7 @@ export default function EditClientModal({
             <div className="w-9 h-9 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center shadow-md">
               <User className="w-4 h-4 text-white" />
             </div>
-            Modifier le client
+            {isEdit ? "Modifier le client" : "Ajouter un client"}
           </DialogTitle>
         </DialogHeader>
 
@@ -276,7 +313,7 @@ export default function EditClientModal({
             onClick={handleSave}
             className="bg-gradient-to-r cursor-pointer from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-md hover:shadow-lg transition-all h-9"
           >
-            Enregistrer les modifications
+            {isEdit ? "Modifier" : "Ajouter"}
           </Button>
         </DialogFooter>
       </DialogContent>
