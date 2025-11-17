@@ -17,6 +17,7 @@ export const ApiService = {
   register: (data: Partial<UserDTO>) => api.post("/auth/register", data),
   logout: () => api.post("/auth/logout"),
   currentUser: () => api.get("/auth/me"),
+  refreshToken: () => api.post("/auth/refresh"),
 
   // ----- CLIENTS -----
   getClients: () => api.get<Client[]>("/clients"),
