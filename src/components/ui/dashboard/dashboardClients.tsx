@@ -6,16 +6,6 @@ import { Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import EditClientModal from "../../common/Modal/userModal";
 import { ApiService } from "@/src/core/services/apiService";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { ConfirmationDialog } from "../../common/Modal/confirmationDialog";
 
 export const DashboardClientsComponent = () => {

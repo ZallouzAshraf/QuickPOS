@@ -20,6 +20,7 @@ import {
 import { ApiService } from "@/src/core/services/apiService";
 import { Client } from "@/src/core/types/types";
 import { User, Mail, Phone, MapPin, Percent, CheckCircle } from "lucide-react";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 interface EditClientModalProps {
@@ -54,13 +55,19 @@ const defaultClient: Partial<Client> = {
   status: ClientStatus.ACTIVE || ClientStatus.INACTIVE,
 };
 
-interface CountryPhone {
+interface Country {
   name: {
     common: string;
+    official: string;
   };
+  cca2: string;
   idd: {
     root: string;
     suffixes: string[];
+  };
+  flags: {
+    png: string;
+    svg: string;
   };
 }
 
@@ -72,16 +79,19 @@ export default function EditClientModal({
   mode,
 }: EditClientModalProps) {
   const [form, setForm] = useState<Partial<Client>>(defaultClient);
-  const [phoneCodes, setPhoneCodes] = useState<
-    { code: string; country: string }[]
-  >([]);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [selectedCode, setSelectedCode] = useState<string>("+216");
+  const [isLoadingCountries, setIsLoadingCountries] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     const timer = setTimeout(() => {
       if (mode === "edit" && client) {
         setForm(client);
+        if (client.phone) {
+          const match = client.phone.match(/^\+\d{1,4}/);
+          if (match) setSelectedCode(match[0]);
+        }
       } else {
         setForm(defaultClient);
       }
@@ -90,39 +100,41 @@ export default function EditClientModal({
     return () => clearTimeout(timer);
   }, [mode, client, open]);
 
+  useEffect(() => {
+    const fetchCountries = async () => {
+      setIsLoadingCountries(true);
+      try {
+        const response = await ApiService.getPays();
+        const data: Country[] = response.data;
+        const sortedCountries = data
+          .filter((c) => c.idd?.root && c.idd?.suffixes?.length > 0)
+          .sort((a, b) => a.name.common.localeCompare(b.name.common));
+
+        setCountries(sortedCountries);
+      } catch (error) {
+        console.error("Erreur lors du chargement des pays:", error);
+      } finally {
+        setIsLoadingCountries(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
   const handleChange = (field: keyof Client, value: string | number) => {
     setForm({ ...form, [field]: value });
   };
 
   const handleSave = () => {
-    onSave(form);
+    const phoneWithCode = form.phone
+      ? `${selectedCode} ${form.phone.replace(/^\+?\d{1,4}\s*/, "")}`
+      : "";
+
+    onSave({ ...form, phone: phoneWithCode });
     setOpen(false);
   };
 
   const isEdit = mode === "edit";
-
-  useEffect(() => {
-    const fetchCodes = async () => {
-      try {
-        const res = await ApiService.getPhoneCodes();
-        const codes: { code: string; country: string }[] = res.data
-          .map((c: CountryPhone | null) => {
-            if (!c) return;
-            if (!c.idd?.root || !c.idd?.suffixes) return null;
-            return {
-              code: c.idd.root + c.idd.suffixes[0],
-              country: c.name.common,
-            };
-          })
-          .filter(Boolean);
-        codes.sort((a, b) => a.country.localeCompare(b.country));
-        setPhoneCodes(codes);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchCodes();
-  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -222,20 +234,41 @@ export default function EditClientModal({
                     <Select
                       value={selectedCode}
                       onValueChange={(value) => setSelectedCode(value)}
+                      disabled={isLoadingCountries}
                     >
-                      <SelectTrigger className="h-9 bg-white border-slate-300 focus:border-indigo-400 focus:ring-indigo-400/20">
+                      <SelectTrigger className="h-9 w-[180px] bg-white cursor-pointer border-slate-300 focus:border-indigo-400 focus:ring-indigo-400/20">
                         <SelectValue placeholder="+216" />
                       </SelectTrigger>
                       <SelectContent className="bg-white max-h-60 overflow-y-auto">
-                        {phoneCodes.map((c, index) => (
-                          <SelectItem key={index} value={c.code}>
-                            {c.country} ({c.code})
+                        {isLoadingCountries ? (
+                          <SelectItem value="loading" disabled>
+                            Chargement...
                           </SelectItem>
-                        ))}
+                        ) : (
+                          countries.map((country, index) => {
+                            const code =
+                              country.idd.root +
+                              (country.idd.suffixes[0] || "");
+                            return (
+                              <SelectItem key={index} value={code}>
+                                <span className="flex items-center gap-2 cursor-pointer">
+                                  <Image
+                                    src={country.flags.png}
+                                    alt={country.name.common}
+                                    width={16}
+                                    height={16}
+                                    className="object-cover rounded"
+                                  />
+                                  {country.name.common} ({code})
+                                </span>
+                              </SelectItem>
+                            );
+                          })
+                        )}
                       </SelectContent>
                     </Select>
                     <Input
-                      value={form.phone}
+                      value={form.phone?.replace(/^\+?\d{1,4}\s*/, "") || ""}
                       onChange={(e) => handleChange("phone", e.target.value)}
                       className="bg-white border-slate-300 focus:border-indigo-400 focus:ring-indigo-400/20 transition-all h-9 flex-1"
                       placeholder="712345678"
@@ -266,6 +299,42 @@ export default function EditClientModal({
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-slate-700 font-medium text-xs">
+                    Pays
+                  </Label>
+                  <Select
+                    value={form.country}
+                    onValueChange={(value) => handleChange("country", value)}
+                    disabled={isLoadingCountries}
+                  >
+                    <SelectTrigger className="bg-white border-slate-300 cursor-pointer focus:border-emerald-400 focus:ring-emerald-400/20 h-9">
+                      <SelectValue placeholder="Pays" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white max-h-60 overflow-y-auto">
+                      {isLoadingCountries ? (
+                        <SelectItem value="loading" disabled>
+                          Chargement...
+                        </SelectItem>
+                      ) : (
+                        countries.map((country, index) => (
+                          <SelectItem key={index} value={country.name.common}>
+                            <span className="flex items-center gap-2 cursor-pointer">
+                              <Image
+                                src={country.flags.png}
+                                alt={country.name.common}
+                                width={16}
+                                height={16}
+                                className="object-cover rounded"
+                              />
+                              {country.name.common}
+                            </span>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-700 font-medium text-xs">
                     Ville
                   </Label>
                   <Input
@@ -284,17 +353,6 @@ export default function EditClientModal({
                     onChange={(e) => handleChange("postalCode", e.target.value)}
                     className="bg-white border-slate-300 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all h-9"
                     placeholder="0000"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-slate-700 font-medium text-xs">
-                    Pays
-                  </Label>
-                  <Input
-                    value={form.country}
-                    onChange={(e) => handleChange("country", e.target.value)}
-                    className="bg-white border-slate-300 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all h-9"
-                    placeholder="Pays"
                   />
                 </div>
               </div>
