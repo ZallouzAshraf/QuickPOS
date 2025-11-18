@@ -6,16 +6,6 @@ import { Edit, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import EditClientModal from "../../common/Modal/userModal";
 import { ApiService } from "@/src/core/services/apiService";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { ConfirmationDialog } from "../../common/Modal/confirmationDialog";
 
 export const DashboardClientsComponent = () => {
@@ -118,11 +108,12 @@ export const DashboardClientsComponent = () => {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                   Contact
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                  Phone
-                </th>
+
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                   Adresse
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  Type
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
                   Actions
@@ -149,13 +140,13 @@ export const DashboardClientsComponent = () => {
                       <p className="text-slate-500">{client.phone}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-slate-600 text-sm">
-                    {client.phone}
-                  </td>
+
                   <td className="px-6 py-4">
                     <span className=" text-slate-600">{client.address}</span>
                   </td>
-
+                  <td className="px-6 py-4 font-bold text-slate-600 text-sm">
+                    {client.type}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button
