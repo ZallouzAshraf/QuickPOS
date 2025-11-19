@@ -1,8 +1,8 @@
-import { ProductDetails } from "@/src/core/types/types";
+import { Product } from "@/src/core/types/types";
 import { Minus, Plus, Trash2 } from "lucide-react";
 
 interface CartItem {
-  product: ProductDetails;
+  product: Product;
   quantity: number;
 }
 
@@ -25,7 +25,7 @@ export const CartItemComponent = ({
       </div>
       <div className="flex items-center gap-2">
         <button
-          onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
+          onClick={() => onUpdateQuantity(item.product._id, item.quantity - 1)}
           className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-colors"
         >
           <Minus className="w-4 h-4" />
@@ -34,7 +34,7 @@ export const CartItemComponent = ({
           {item.quantity}
         </span>
         <button
-          onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
+          onClick={() => onUpdateQuantity(item.product._id, item.quantity + 1)}
           className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-emerald-50 hover:border-emerald-500 hover:text-emerald-600 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -46,7 +46,7 @@ export const CartItemComponent = ({
         </p>
       </div>
       <button
-        onClick={() => onRemove(item.product.id)}
+        onClick={() => onRemove(item.product._id)}
         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
       >
         <Trash2 className="w-4 h-4" />
