@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+"use client";
+
+import { useState, useMemo, useEffect } from "react";
 import {
   ShoppingCart,
   Search,
@@ -13,77 +15,11 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ProductDetails } from "@/src/core/types/types";
 import { ProductCard } from "./ProductCardComponent/ProductCardComponent";
 import { CartItemComponent } from "./CartItemComponent/CartItemComponent";
 import { useAppContext } from "@/src/core/context/AppContext";
-
-interface CartItem {
-  product: ProductDetails;
-  quantity: number;
-}
-
-interface Sale {
-  id: string;
-  items: CartItem[];
-  subtotal: number;
-  tax: number;
-  discount: number;
-  total: number;
-  date: string;
-  paymentMethod: "cash" | "card";
-}
-
-const mockProducts: ProductDetails[] = [
-  {
-    id: "1",
-    name: "Pizza Margherita",
-    price: 15.5,
-    category: "Pizza",
-    stock: 50,
-  },
-  {
-    id: "2",
-    name: "Pizza Pepperoni",
-    price: 18.0,
-    category: "Pizza",
-    stock: 45,
-  },
-  {
-    id: "3",
-    name: "Pizza Quatre Fromages",
-    price: 19.5,
-    category: "Pizza",
-    stock: 30,
-  },
-  {
-    id: "4",
-    name: "Coca-Cola 33cl",
-    price: 2.5,
-    category: "Boisson",
-    stock: 100,
-  },
-  {
-    id: "5",
-    name: "Eau Minérale 1L",
-    price: 1.5,
-    category: "Boisson",
-    stock: 150,
-  },
-  { id: "6", name: "Jus d'Orange", price: 3.5, category: "Boisson", stock: 80 },
-  { id: "7", name: "Tiramisu", price: 6.5, category: "Dessert", stock: 25 },
-  { id: "8", name: "Panna Cotta", price: 5.5, category: "Dessert", stock: 20 },
-  { id: "9", name: "Salade César", price: 12.0, category: "Entrée", stock: 40 },
-  { id: "10", name: "Bruschetta", price: 8.5, category: "Entrée", stock: 35 },
-  { id: "11", name: "Calzone", price: 16.5, category: "Pizza", stock: 28 },
-  {
-    id: "12",
-    name: "Limonade Maison",
-    price: 3.0,
-    category: "Boisson",
-    stock: 60,
-  },
-];
+import { CartItem, Product, Sale } from "@/src/core/types/types";
+import { ApiService } from "@/src/core/services/apiService";
 
 export default function DashboardSalesComponent() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -94,26 +30,47 @@ export default function DashboardSalesComponent() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [salesHistory, setSalesHistory] = useState<Sale[]>([]);
   const { isSalesMode } = useAppContext();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [clientInfo, setClientInfo] = useState<{
+    firstName: string;
+    lastName: string;
+  }>({ firstName: "", lastName: "" });
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    "cash" | "card" | null
+  >(null);
 
-  // Get unique categories
   const categories = useMemo(() => {
-    const cats = ["all", ...new Set(mockProducts.map((p) => p.category))];
+    const cats = ["all", ...new Set(products.map((p) => p.category))];
     return cats;
+  }, [products]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await ApiService.getProducts();
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des clients", error);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
-  // Filter products
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter((product) => {
+    return products.filter((product) => {
       const matchesSearch = product.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
+
       const matchesCategory =
         selectedCategory === "all" || product.category === selectedCategory;
+
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, selectedCategory]);
+  }, [products, searchTerm, selectedCategory]);
 
-  // Calculate totals
   const subtotal = useMemo(() => {
     return cart.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
@@ -130,12 +87,12 @@ export default function DashboardSalesComponent() {
   const discountAmount = subtotal * (discountPercent / 100);
   const total = subtotal + tax - discountAmount;
 
-  const addToCart = (product: ProductDetails) => {
+  const addToCart = (product: Product) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
+      const existing = prev.find((item) => item.product._id === product._id);
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id
+          item.product._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -151,13 +108,13 @@ export default function DashboardSalesComponent() {
     }
     setCart((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product._id === productId ? { ...item, quantity } : item
       )
     );
   };
 
   const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+    setCart((prev) => prev.filter((item) => item.product._id !== productId));
   };
 
   const clearCart = () => {
@@ -165,22 +122,48 @@ export default function DashboardSalesComponent() {
     setDiscountPercent(0);
   };
 
-  const completeSale = (paymentMethod: "cash" | "card") => {
-    const sale: Sale = {
-      id: `SALE-${Date.now()}`,
-      items: [...cart],
-      subtotal,
-      tax,
-      discount: discountAmount,
-      total,
-      date: new Date().toLocaleString("fr-FR"),
-      paymentMethod,
+  const completeSale = async () => {
+    if (!selectedPaymentMethod) return;
+
+    const salePayload = {
+      clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
+      items: cart.map((item) => ({
+        productId: item.product._id,
+        name: item.product.name,
+        quantity: item.quantity,
+        unitPrice: item.product.price,
+      })),
+      currency: "TND",
+      taxRate,
+      discountRate: discountPercent,
+      paymentMethod: selectedPaymentMethod,
+      issuedAt: new Date().toISOString(),
     };
 
-    setSalesHistory((prev) => [sale, ...prev]);
-    clearCart();
-    setShowPaymentModal(false);
-    alert("Vente enregistrée avec succès !");
+    try {
+      await ApiService.createInvoice(salePayload);
+      alert("Vente enregistrée avec succès !");
+      setSalesHistory((prev) => [
+        ...prev,
+        {
+          id: `SALE-${Date.now()}`,
+          items: [...cart],
+          subtotal,
+          tax,
+          discount: discountAmount,
+          total,
+          date: new Date().toLocaleString("fr-FR"),
+          paymentMethod: selectedPaymentMethod,
+        },
+      ]);
+      clearCart();
+      setShowClientModal(false);
+      setSelectedPaymentMethod(null);
+      setClientInfo({ firstName: "", lastName: "" });
+    } catch (error) {
+      console.error(error);
+      alert("Erreur lors de la création de la facture");
+    }
   };
 
   const generateInvoice = () => {
@@ -193,6 +176,11 @@ export default function DashboardSalesComponent() {
     alert(
       "Impression du ticket...\n(Fonctionnalité à implémenter avec window.print())"
     );
+  };
+
+  const handlePaymentClick = (method: "cash" | "card") => {
+    setSelectedPaymentMethod(method);
+    setShowClientModal(true);
   };
 
   return (
@@ -272,7 +260,7 @@ export default function DashboardSalesComponent() {
             >
               {filteredProducts.map((product) => (
                 <ProductCard
-                  key={product.id}
+                  key={product._id}
                   product={product}
                   onAdd={addToCart}
                   viewMode={viewMode}
@@ -316,7 +304,7 @@ export default function DashboardSalesComponent() {
                 ) : (
                   cart.map((item) => (
                     <CartItemComponent
-                      key={item.product.id}
+                      key={item.product._id}
                       item={item}
                       onUpdateQuantity={updateQuantity}
                       onRemove={removeFromCart}
@@ -421,7 +409,7 @@ export default function DashboardSalesComponent() {
               </h3>
               <div className="space-y-4 mb-8">
                 <button
-                  onClick={() => completeSale("cash")}
+                  onClick={() => handlePaymentClick("cash")}
                   className="w-full flex items-center gap-4 p-6 border-2 border-slate-200 hover:border-emerald-500 rounded-2xl transition-all group"
                 >
                   <div className="p-3 bg-emerald-100 rounded-xl group-hover:bg-emerald-500 transition-colors">
@@ -435,7 +423,7 @@ export default function DashboardSalesComponent() {
                   </div>
                 </button>
                 <button
-                  onClick={() => completeSale("card")}
+                  onClick={() => handlePaymentClick("card")}
                   className="w-full flex items-center gap-4 p-6 border-2 border-slate-200 hover:border-emerald-500 rounded-2xl transition-all group"
                 >
                   <div className="p-3 bg-emerald-100 rounded-xl group-hover:bg-emerald-500 transition-colors">
@@ -489,6 +477,51 @@ export default function DashboardSalesComponent() {
           </div>
         )}
       </div>
+
+      {showClientModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8">
+            <h3 className="text-2xl font-bold text-slate-800 mb-6">
+              Informations du client
+            </h3>
+            <div className="space-y-4 mb-8">
+              <Input
+                placeholder="Prénom"
+                value={clientInfo.firstName}
+                onChange={(e) =>
+                  setClientInfo({ ...clientInfo, firstName: e.target.value })
+                }
+              />
+              <Input
+                placeholder="Nom"
+                value={clientInfo.lastName}
+                onChange={(e) =>
+                  setClientInfo({ ...clientInfo, lastName: e.target.value })
+                }
+              />
+            </div>
+            <Button
+              onClick={completeSale}
+              disabled={!clientInfo.firstName || !clientInfo.lastName}
+              className={`w-full h-12 font-bold rounded-xl mb-2 ${
+                !clientInfo.firstName || !clientInfo.lastName
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-emerald-600 text-white"
+              }`}
+            >
+              Confirmer
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setShowClientModal(false)}
+              className="w-full h-12 rounded-xl"
+            >
+              Annuler
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -20,20 +20,20 @@ export type Client = {
   updatedAt?: string;
 };
 
-export interface Invoice {
-  _id: string;
-  clientName: string;
-  date: string;
-  amount: number;
-  status: "paid" | "pending" | "overdue";
+export interface CartItem {
+  product: Product;
+  quantity: number;
 }
 
 export interface Sale {
-  _id: string;
-  product: string;
-  quantity: number;
-  amount: number;
+  id: string;
+  items: CartItem[];
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
   date: string;
+  paymentMethod: "cash" | "card";
 }
 
 export interface Product {
@@ -101,6 +101,39 @@ export interface UpdateCategoryItemDto {
   oldItemName: string;
   newItemName: string;
 }
+
+export type InvoiceItem = {
+  productId: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export type Invoice = {
+  _id: string;
+  clientId?: string;
+  clientName?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientAddress?: string;
+  items: InvoiceItem[];
+  currency: string;
+  taxRate?: number;
+  discountRate?: number;
+  paymentMethod: "cash" | "card" | "transfer" | "mobile" | "other";
+  issuedAt?: string;
+  dueDate?: string;
+  status?: InvoiceStatus;
+};
+
+export enum InvoiceStatus {
+  DRAFT = "draft",
+  ISSUED = "issued",
+  PAID = "paid",
+  VOID = "void",
+}
+
+export type PaymentMethod = "cash" | "card" | "transfer" | "mobile" | "other";
 
 export type UpdateLicenseDTO = Partial<Omit<License, "id" | "createdAt">>;
 

@@ -3,6 +3,7 @@ import {
   AddCategoryItemDto,
   Client,
   CreateCategoryDto,
+  Invoice,
   License,
   Product,
   Sale,
@@ -43,9 +44,9 @@ export const ApiService = {
   getSales: () => api.get<Sale[]>("/sales"),
   getSaleById: (id: string) => api.get<Sale>(`/sales/${id}`),
   createSale: (data: Partial<Sale>) => api.post("/sales", data),
-  updateSale: (id: string, data: Partial<Sale>) => {
-    const { _id, ...saleData } = data;
-    return api.patch(`/sales/${id}`, saleData);
+  updateSale: (_id: string, data: Partial<Sale>) => {
+    const { id, ...saleData } = data;
+    return api.patch(`/sales/${_id}`, saleData);
   },
   deleteSale: (id: string) => api.delete(`/sales/${id}`),
 
@@ -90,6 +91,16 @@ export const ApiService = {
 
   deleteCategoryItem: (userId: string, categoryName: string) =>
     api.delete(`/categories/user/${userId}/item/${categoryName}`),
+
+  // ----- INVOICES -----
+  getInvoices: () => api.get("/invoices"),
+  getInvoiceById: (id: string) => api.get(`/invoices/${id}`),
+  createInvoice: (data: Partial<Invoice>) => api.post("/invoices", data),
+  updateInvoice: (id: string, data: Partial<Invoice>) => {
+    const { _id, ...invoiceData } = data;
+    return api.patch(`/invoices/${id}`, invoiceData);
+  },
+  deleteInvoice: (id: string) => api.delete(`/invoices/${id}`),
 
   // ----- EXTERNE API  -----
   getPays: () =>
