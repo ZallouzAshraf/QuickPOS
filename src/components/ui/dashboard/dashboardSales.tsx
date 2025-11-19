@@ -34,7 +34,6 @@ export default function DashboardSalesComponent() {
   const [clientInfo, setClientInfo] = useState<{
     firstName: string;
     lastName: string;
-    email?: string;
   }>({ firstName: "", lastName: "" });
   const [showClientModal, setShowClientModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
@@ -128,7 +127,6 @@ export default function DashboardSalesComponent() {
 
     const salePayload = {
       clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
-      clientEmail: clientInfo.email,
       items: cart.map((item) => ({
         productId: item.product._id,
         name: item.product.name,
@@ -161,7 +159,7 @@ export default function DashboardSalesComponent() {
       clearCart();
       setShowClientModal(false);
       setSelectedPaymentMethod(null);
-      setClientInfo({ firstName: "", lastName: "", email: "" });
+      setClientInfo({ firstName: "", lastName: "" });
     } catch (error) {
       console.error(error);
       alert("Erreur lors de la création de la facture");
@@ -501,20 +499,19 @@ export default function DashboardSalesComponent() {
                   setClientInfo({ ...clientInfo, lastName: e.target.value })
                 }
               />
-              <Input
-                placeholder="Email (optionnel)"
-                value={clientInfo.email}
-                onChange={(e) =>
-                  setClientInfo({ ...clientInfo, email: e.target.value })
-                }
-              />
             </div>
             <Button
               onClick={completeSale}
-              className="w-full h-12 bg-emerald-600 text-white font-bold rounded-xl mb-2"
+              disabled={!clientInfo.firstName || !clientInfo.lastName}
+              className={`w-full h-12 font-bold rounded-xl mb-2 ${
+                !clientInfo.firstName || !clientInfo.lastName
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-emerald-600 text-white"
+              }`}
             >
               Confirmer
             </Button>
+
             <Button
               variant="outline"
               onClick={() => setShowClientModal(false)}
