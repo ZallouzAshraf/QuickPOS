@@ -11,6 +11,15 @@ export default function InvoiceDetails() {
   const [currentUser, setCurrentUser] = useState<UserDTO>();
 
   useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const response = await ApiService.currentUser();
+      setCurrentUser(response.data);
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
     const fetchInvoice = async () => {
       try {
         const response = await ApiService.getInvoiceById(id as string);
@@ -64,7 +73,7 @@ export default function InvoiceDetails() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">
-                    Votre Société
+                    {currentUser?.company}
                   </h2>
                   <p className="text-slate-600 text-sm">
                     Services Professionnels
@@ -219,8 +228,8 @@ export default function InvoiceDetails() {
 
           <div className="px-8 py-4 bg-slate-900 text-center">
             <p className="text-slate-400 text-sm">
-              Merci pour votre confiance • © {new Date().getFullYear()} Votre
-              Société. Tous droits réservés.
+              Merci pour votre confiance • © {new Date().getFullYear()}{" "}
+              {currentUser?.company}. Tous droits réservés.
             </p>
           </div>
         </div>
