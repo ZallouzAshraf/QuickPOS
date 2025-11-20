@@ -1,32 +1,26 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
 import { Input } from "@/components/ui/input";
+import { ApiService } from "@/src/core/services/apiService";
 import { Invoice } from "@/src/core/types/types";
-import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react";
+import { Eye, Search, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const DashboardInvoicesComponent = () => {
-  const invoices: Invoice[] = [
-    {
-      id: "INV-001",
-      clientName: "Ahmed Ben Ali",
-      date: "2024-03-15",
-      amount: 1850,
-      status: "paid",
-    },
-    {
-      id: "INV-002",
-      clientName: "Fatma Trabelsi",
-      date: "2024-03-14",
-      amount: 2420,
-      status: "pending",
-    },
-    {
-      id: "INV-003",
-      clientName: "Mohamed Gharbi",
-      date: "2024-03-10",
-      amount: 980,
-      status: "overdue",
-    },
-  ];
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const response = await ApiService.getInvoices();
+        setInvoices(response.data);
+      } catch (err) {
+        console.error("Failed to fetch invoices", err);
+      }
+    };
+
+    fetchInvoices();
+  }, []);
 
   const getStatusBadge = (status: Invoice["status"]) => {
     const styles = {
@@ -58,10 +52,6 @@ export const DashboardInvoicesComponent = () => {
             className="pl-12 h-12 bg-white border-slate-300 rounded-xl"
           />
         </div>
-        <Button className="w-full sm:w-auto h-12 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30">
-          <Plus className="w-5 h-5 mr-2" />
-          Nouvelle facture
-        </Button>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -82,6 +72,9 @@ export const DashboardInvoicesComponent = () => {
                   Montant
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  Méthode de Paiement
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                   Statut
                 </th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">
@@ -92,37 +85,47 @@ export const DashboardInvoicesComponent = () => {
             <tbody className="divide-y divide-slate-200">
               {invoices.map((invoice) => (
                 <tr
-                  key={invoice.id}
+                  key={invoice.invoiceNumber}
                   className="hover:bg-slate-50 transition-colors"
                 >
                   <td className="px-6 py-4">
                     <span className="font-semibold text-slate-700">
-                      {invoice.id}
+                      {invoice.invoiceNumber}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-slate-700">
                     {invoice.clientName}
                   </td>
                   <td className="px-6 py-4 text-slate-600 text-sm">
-                    {invoice.date}
+                    {invoice.issuedAt
+                      ? new Date(invoice.issuedAt).toLocaleDateString("fr-FR")
+                      : "-"}
                   </td>
                   <td className="px-6 py-4">
                     <span className="font-bold text-emerald-600">
-                      {invoice.amount} TND
+                      {invoice.total} TND
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-slate-700">
+                    {invoice.paymentMethod}
                   </td>
                   <td className="px-6 py-4">
                     {getStatusBadge(invoice.status)}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `/dashboard/invoices/${invoice._id}`,
+                            "_blank"
+                          )
+                        }
+                        className="p-2 cursor-pointer text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                      >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <button className="p-2 cursor-pointer text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

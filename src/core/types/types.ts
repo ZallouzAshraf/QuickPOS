@@ -111,26 +111,28 @@ export type InvoiceItem = {
 
 export type Invoice = {
   _id: string;
-  clientId?: string;
+  invoiceNumber: string;
   clientName?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  clientAddress?: string;
   items: InvoiceItem[];
   currency: string;
-  taxRate?: number;
-  discountRate?: number;
-  paymentMethod: "cash" | "card" | "transfer" | "mobile" | "other";
-  issuedAt?: string;
+  taxRate: number;
+  discountRate: number;
+  subtotal: number;
+  taxAmount: number;
+  discountAmount: number;
+  total: number;
+  status: InvoiceStatus;
+  paymentMethod: PaymentMethod;
+  issuedAt: string;
   dueDate?: string;
-  status?: InvoiceStatus;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export enum InvoiceStatus {
-  DRAFT = "draft",
-  ISSUED = "issued",
   PAID = "paid",
-  VOID = "void",
+  PENDING = "pending",
+  OVERDUE = "overdue",
 }
 
 export type PaymentMethod = "cash" | "card" | "transfer" | "mobile" | "other";
