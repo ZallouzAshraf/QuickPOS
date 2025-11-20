@@ -18,7 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ApiService } from "@/src/core/services/apiService";
-import { Client } from "@/src/core/types/types";
+import {
+  Client,
+  ClientStatus,
+  ClientType,
+  Country,
+} from "@/src/core/types/types";
 import { User, Mail, Phone, MapPin, Percent, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -29,16 +34,6 @@ interface EditClientModalProps {
   setOpen: (open: boolean) => void;
   onSave: (updatedClient: Partial<Client>) => void;
   mode: "add" | "edit";
-}
-
-export enum ClientType {
-  INDIVIDUAL = "Particulier",
-  COMPANY = "Entreprise",
-}
-
-export enum ClientStatus {
-  ACTIVE = "active",
-  INACTIVE = "inactive",
 }
 
 const defaultClient: Partial<Client> = {
@@ -54,22 +49,6 @@ const defaultClient: Partial<Client> = {
   discountRate: 0,
   status: ClientStatus.ACTIVE || ClientStatus.INACTIVE,
 };
-
-interface Country {
-  name: {
-    common: string;
-    official: string;
-  };
-  cca2: string;
-  idd: {
-    root: string;
-    suffixes: string[];
-  };
-  flags: {
-    png: string;
-    svg: string;
-  };
-}
 
 export default function EditClientModal({
   client,
