@@ -7,7 +7,6 @@ import ProductsPage from "./products/page";
 import SalesPage from "./sales/page";
 import SettingPage from "./settings/page";
 import { Sidebar } from "@/src/components/layout/sideBar";
-import { TabKey } from "@/src/core/types/types";
 import { DashboardHeader } from "@/src/components/ui/dashboard/dashboardHeader";
 import { AppProvider, useAppContext } from "@/src/core/context/AppContext";
 import DashboardSalesComponent from "@/src/components/ui/dashboard/dashboardSales";
@@ -36,19 +35,6 @@ function DashboardLayout() {
       default:
         return <OverViewPage />;
     }
-  };
-
-  const getTitleByTab = () => {
-    const titles: Record<TabKey, string> = {
-      overview: "Vue d'ensemble",
-      clients: "Clients",
-      products: "Produits",
-      invoices: "Factures",
-      sales: "Ventes",
-      settings: "Paramètres",
-    };
-
-    return titles[activeTab];
   };
 
   return (

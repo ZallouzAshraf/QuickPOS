@@ -57,6 +57,14 @@ export type UserDTO = {
   password: string;
   phone?: string;
   status: "Actif" | "Inactif";
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  matriculeFiscale?: string;
+  logoUrl?: string;
+  emailNotifications: boolean;
+  lowStockAlerts: boolean;
   createdAt: string;
   updatedAt?: string;
 };
@@ -135,6 +143,26 @@ export enum InvoiceStatus {
   OVERDUE = "overdue",
 }
 
+export interface Country {
+  name: {
+    common: string;
+    official: string;
+  };
+  cca2: string;
+  idd: {
+    root: string;
+    suffixes: string[];
+  };
+  flags: {
+    png: string;
+    svg: string;
+  };
+}
+
+export enum ClientStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+}
 export type PaymentMethod = "cash" | "card" | "transfer" | "mobile" | "other";
 
 export type UpdateLicenseDTO = Partial<Omit<License, "id" | "createdAt">>;
