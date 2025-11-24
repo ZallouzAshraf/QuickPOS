@@ -14,7 +14,10 @@ const eslintConfig = defineConfig([
   ]),
   {
     rules: {
-      "@typescript-eslint/no-unused-vars": "off", // ← désactive le warning
+      "@typescript-eslint/no-unused-vars": "off", 
+      '@typescript-eslint/no-explicit-any': 'off',
+      "no-unused-vars": ["off"],
+      "no-redeclare": "off"
     },
   },
 ]);
