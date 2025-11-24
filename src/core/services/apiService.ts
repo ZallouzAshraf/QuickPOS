@@ -58,6 +58,12 @@ export const ApiService = {
     const { _id, ...userData } = data;
     return api.patch(`/users/${id}`, userData);
   },
+  updatePassword: (email: string, oldPassword: string, newPassword: string) =>
+    api.patch("/users/update-password", {
+      email,
+      oldPassword,
+      newPassword,
+    }),
   deleteUser: (id: string) => api.delete(`/users/${id}`),
 
   // ----- LICENSE -----
