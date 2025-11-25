@@ -1,12 +1,11 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Client } from "@/src/core/types/types";
-import { Edit, Plus, Search, Trash2 } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import EditClientModal from "../../common/Modal/userModal";
 import { ApiService } from "@/src/core/services/apiService";
-import { ConfirmationDialog } from "../../common/Modal/confirmationDialog";
+import { ConfirmationDialog } from "@/src/components/common/Modal/confirmationDialog";
+import EditClientModal from "@/src/components/common/Modal/userModal";
+import { SearchHeader } from "@/src/components/common/SearchHeader";
 
 export const DashboardClientsComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,6 +14,7 @@ export const DashboardClientsComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+
   const filteredClients = clients?.filter(
     (client) =>
       client.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,24 +78,13 @@ export const DashboardClientsComponent = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="relative flex-1 max-w-md w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <Input
-            placeholder="Rechercher un client..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 h-12 bg-white border-slate-300 rounded-xl"
-          />
-        </div>
-        <Button
-          onClick={handleAddClient}
-          className="w-full sm:w-auto h-12 cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Nouveau client
-        </Button>
-      </div>
+      <SearchHeader
+        searchPlaceholder="Rechercher un client..."
+        textButton="Nouveau client"
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onAddClient={handleAddClient}
+      />
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -108,7 +97,6 @@ export const DashboardClientsComponent = () => {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                   Contact
                 </th>
-
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                   Adresse
                 </th>
@@ -140,7 +128,6 @@ export const DashboardClientsComponent = () => {
                       <p className="text-slate-500">{client.phone}</p>
                     </div>
                   </td>
-
                   <td className="px-6 py-4">
                     <span className=" text-slate-600">{client.address}</span>
                   </td>
