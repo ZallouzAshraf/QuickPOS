@@ -1,5 +1,11 @@
-import { TrendingUp, Users, Package, FileText, ShoppingCart, Settings } from "lucide-react";
-
+import {
+  TrendingUp,
+  Users,
+  Package,
+  FileText,
+  ShoppingCart,
+  Settings,
+} from "lucide-react";
 
 export const MENU_ITEMS = [
   { id: "overview", label: "Vue d'ensemble", icon: TrendingUp },
@@ -9,5 +15,3 @@ export const MENU_ITEMS = [
   { id: "sales", label: "Point de Vente", icon: ShoppingCart },
   { id: "settings", label: "Paramètres", icon: Settings },
 ] as const;
-
- 

@@ -1,4 +1,4 @@
-import { ProductDetails } from "@/src/core/types/types";
+import { Product } from "@/src/core/types/types";
 import { Receipt } from "lucide-react";
 
 export const ProductCard = ({
@@ -6,8 +6,8 @@ export const ProductCard = ({
   onAdd,
   viewMode,
 }: {
-  product: ProductDetails;
-  onAdd: (product: ProductDetails) => void;
+  product: Product;
+  onAdd: (product: Product) => void;
   viewMode: "grid" | "list";
 }) => {
   const isLowStock = product.stock < 10;
