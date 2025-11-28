@@ -246,14 +246,33 @@ export default function ProductModal({
                 <div className="space-y-1.5">
                   <Label className="text-slate-700 font-medium text-xs flex items-center gap-1.5">
                     <ImageIcon className="w-3 h-3 text-slate-500" />
-                    URL de l&apos;image
+                    Image du produit
                   </Label>
-                  <Input
-                    value={form.image ?? ""}
-                    onChange={(e) => handleChange("image", e.target.value)}
-                    className="bg-white border-slate-300 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all h-9"
-                    placeholder="https://exemple.com/image.jpg"
-                  />
+
+                  {form.image ? (
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="h-8 cursor-pointer"
+                        onClick={() => setForm({ ...form, image: "" })}
+                      >
+                        Changer l’image
+                      </Button>
+                    </div>
+                  ) : (
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      className="cursor-pointer bg-white border-slate-300 h-9"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        const url = URL.createObjectURL(file);
+                        setForm({ ...form, image: url });
+                      }}
+                    />
+                  )}
                 </div>
 
                 {form.image && (
@@ -263,6 +282,8 @@ export default function ProductModal({
                     </p>
                     <div className="relative w-full h-32 bg-slate-100 rounded-md overflow-hidden">
                       <Image
+                        width={400}
+                        height={300}
                         src={form.image}
                         alt="Aperçu"
                         className="w-full h-full object-contain"
